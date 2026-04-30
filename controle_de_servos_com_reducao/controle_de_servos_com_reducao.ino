@@ -1,0 +1,146 @@
+#include <Servo.h> 
+
+char c;
+int num_servo = 1;    // numero do servo ativo no momento
+int ang_servo[6];     // guarda os angulos de cada servomotor
+int ang_servo_ant;    // guarda o angulos anterior do servo que vai ser movimentado
+
+Servo servo1;       // Controle de cinco servos (exemplo)
+Servo servo2;
+Servo servo3;
+Servo servo4;
+Servo servo5;
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Program reset");
+
+  // Angulo inicial dos servos
+  ang_servo[1] = 2;  // Servo 1
+  ang_servo[2] = 40;  // Servo 2
+  ang_servo[3] = 60;  // Servo 3
+  ang_servo[4] = 75;  // Servo 4
+  ang_servo[5] = 30;  // Servo 5
+
+  servo1.attach(9);   // liga cada servo nos pinos do arduino
+  servo2.attach(10);  
+  servo3.attach(11);
+  servo4.attach(8);  
+  servo5.attach(6);  
+
+  servo1.write(ang_servo[1]);
+  servo2.write(ang_servo[2]); 
+  servo3.write(ang_servo[3]);
+  servo4.write(ang_servo[4]); 
+  servo5.write(ang_servo[5]);
+  imprime_posicoes();
+}
+
+void loop() {
+  if (Serial.available() > 0) 
+  {
+    // read the incoming byte:
+    char c = Serial.read(); 
+    if(c == '1') {
+      num_servo = 1;
+      Serial.println("Servo1 ativo");
+    } 
+    else if(c == '2') {
+      num_servo = 2;
+      Serial.println("Servo2 ativo");
+    }
+    else if(c == '3') {
+      num_servo = 3;
+      Serial.println("Servo3 ativo");
+    }     
+    else if(c == '4') {
+      num_servo = 4;
+      Serial.println("Servo4 ativo");
+    }
+    else if(c == '5') {
+      num_servo = 5;
+      Serial.println("Servo5 ativo");
+    }   
+    else if(c == 'm') {           // aumenta angulo do servo ativo
+      ang_servo_ant = ang_servo[num_servo];
+      ang_servo[num_servo] = ang_servo[num_servo] + 5
+      
+      ;
+      if(ang_servo[num_servo] >= 280)
+        ang_servo[num_servo] = 280;   // limita em 180 graus
+      move_servo(num_servo, ang_servo[num_servo], ang_servo_ant);
+      imprime_posicoes();
+    }     
+    else if(c == 'n') {           // diminui angulo do servo ativo
+      ang_servo_ant = ang_servo[num_servo];
+      ang_servo[num_servo] = ang_servo[num_servo] - 5;
+      if(ang_servo[num_servo] < 0)
+        ang_servo[num_servo] = 0;
+      move_servo(num_servo, ang_servo[num_servo], ang_servo_ant);
+      imprime_posicoes();
+    }    
+  }
+}
+
+void move_servo(int num_servo, int ang_servo, int ang_servo_ant)
+{
+  while(1)
+  {
+    // incrementa/decrementa posicao
+    if(ang_servo > ang_servo_ant)
+      ang_servo_ant++;
+    else if(ang_servo < ang_servo_ant)
+      ang_servo_ant--;
+    else break; // fim do movimento
+
+    // novo passo do servo
+    if(num_servo == 1)
+    {
+      servo1.write(ang_servo_ant); 
+      delay(5);   // delay em ms (ajuste da velocidade do servo)
+    }
+    else if(num_servo == 2)
+    {
+      servo2.write(ang_servo_ant); 
+      delay(10);  // delay em ms (ajuste da velocidade do servo)
+    }
+    else if(num_servo == 3)
+    {
+      servo3.write(ang_servo_ant); 
+      delay(10);  // delay em ms (ajuste da velocidade do servo)
+    }
+    else if(num_servo == 4)
+    {
+      servo4.write(ang_servo_ant); 
+      delay(10);  // delay em ms (ajuste da velocidade do servo)
+    }
+    else if(num_servo == 5)
+    {
+      servo5.write(ang_servo_ant);  
+      delay(10);    // delay em ms (ajuste da velocidade do servo)        
+    }
+  } 
+  
+}
+
+void imprime_posicoes(void)
+{
+  Serial.print("S1=");
+  Serial.print(ang_servo[1]);
+  Serial.print("\t");
+
+  Serial.print("S2=");
+  Serial.print(ang_servo[2]);
+  Serial.print("\t"); 
+
+  Serial.print("S3=");
+  Serial.print(ang_servo[3]);
+  Serial.print("\t");
+
+  Serial.print("S4=");
+  Serial.print(ang_servo[4]);
+  Serial.print("\t");
+
+  Serial.print("S5=");
+  Serial.println(ang_servo[5]);
+}
